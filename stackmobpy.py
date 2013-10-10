@@ -142,6 +142,12 @@ class StackMobClient(object):
         resp = self._request('POST', '/%s' % entity, json.dumps(data))
         r = resp.read()
         if resp.status != 201:
+            if resp.status == 401:
+                # Trying to login again
+                self._login()
+                self.insert(entity, data)
+                return
+
             raise Exception('Error code %s, response %s' % (resp.status, r))
         else:
             return r
@@ -154,6 +160,11 @@ class StackMobClient(object):
         resp = self._request('PUT', '/%s/%s' % (entity, entity_id), json.dumps(data))
         r = resp.read()
         if resp.status != 200:
+            if resp.status == 401:
+                # Trying to login again
+                self._login()
+                self.update(entity, entity_id, data)
+                return
             raise Exception('Error code %s, response %s' % (resp.status, r))
         else:
             return r
